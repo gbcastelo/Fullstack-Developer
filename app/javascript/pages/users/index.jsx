@@ -1,6 +1,8 @@
-import { Head, Link, router } from '@inertiajs/react'
+import { Head, Link, router, usePage } from '@inertiajs/react'
 
 export default function Index({ users }) {
+  const { flash } = usePage().props
+
   function destroy(user) {
     if (confirm(`Delete ${user.full_name}?`)) {
       router.delete(`/users/${user.id}`)
@@ -12,8 +14,13 @@ export default function Index({ users }) {
       <Head title="Users" />
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-semibold">Users</h1>
-        <Link href="/users/new" className="bg-blue-600 text-white rounded px-3 py-2">New user</Link>
+        <nav className="flex items-center gap-4">
+          <Link href="/dashboard" className="text-sm text-blue-600">Back to dashboard</Link>
+          <Link href="/users/new" className="bg-blue-600 text-white rounded px-3 py-2">New user</Link>
+        </nav>
       </div>
+      {flash?.alert && <p className="text-red-600 text-sm">{flash.alert}</p>}
+      {flash?.notice && <p className="text-green-600 text-sm">{flash.notice}</p>}
       <table className="w-full bg-white rounded shadow">
         <tbody>
           {users.map(user => (
