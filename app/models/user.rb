@@ -13,6 +13,8 @@ class User < ApplicationRecord
   validates :full_name, presence: true
   validate :avatar_must_be_an_image
 
+  after_commit :broadcast_dashboard_counts
+
   private
 
   def avatar_must_be_an_image
@@ -25,5 +27,16 @@ class User < ApplicationRecord
     if avatar.byte_size > 5.megabytes
       errors.add(:avatar, "must be smaller than 5MB")
     end
+  end
+
+  # ponytail: broadcasts on every commit (not just role/count-relevant
+  # changes) for simplicity — at this app's scale a slightly chattier
+  # channel costs nothing; add a saved_change_to_role? guard if this ever
+  # needs to scale down broadcast volume.
+  def broadcast_dashboard_counts
+    ActionCable.server.broadcast("dashboard", {
+      total_users: User.count,
+      users_by_role: User.group(:role).count
+    })
   end
 end
