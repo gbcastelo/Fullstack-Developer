@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
   resource :session, only: %i[new create destroy]
+  get "register", to: "registrations#new", as: "register"
+  post "register", to: "registrations#create"
   resource :profile, only: %i[show], controller: "profiles"
   get "dashboard", to: "dashboard#show"
 
