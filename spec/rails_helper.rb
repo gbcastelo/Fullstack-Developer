@@ -66,6 +66,10 @@ RSpec.configure do |config|
   # To enable this behaviour uncomment the line below.
   # config.infer_spec_type_from_file_location!
 
+  # System specs exercise ActiveJob only indirectly (via a controller enqueuing
+  # a job); pull in perform_enqueued_jobs so a spec can force it to run inline.
+  config.include ActiveJob::TestHelper, type: :system
+
   # Filter lines from Rails gems in backtraces.
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:
