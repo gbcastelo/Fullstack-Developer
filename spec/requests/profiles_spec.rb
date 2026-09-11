@@ -27,6 +27,15 @@ RSpec.describe "Profiles", type: :request do
       expect(user.reload.full_name).to eq("Updated Name")
       expect(response).to redirect_to(profile_path)
     end
+
+    it "attaches an uploaded avatar" do
+      sign_in(user)
+      avatar = fixture_file_upload("avatar.png", "image/png")
+
+      patch profile_path, params: { user: { avatar: avatar } }
+
+      expect(user.reload.avatar).to be_attached
+    end
   end
 
   describe "DELETE /profile" do
