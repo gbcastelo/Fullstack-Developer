@@ -45,4 +45,17 @@ RSpec.describe User, type: :model do
     expect(user).not_to be_valid
     expect(user.errors[:avatar]).to be_present
   end
+
+  it "rejects an avatar over 5MB" do
+    user = build(:user)
+    user.avatar.attach(
+      io: File.open(Rails.root.join("spec/fixtures/files/avatar.png")),
+      filename: "avatar.png",
+      content_type: "image/png"
+    )
+    allow(user.avatar).to receive(:byte_size).and_return(6.megabytes)
+
+    expect(user).not_to be_valid
+    expect(user.errors[:avatar]).to include("must be smaller than 5MB")
+  end
 end
