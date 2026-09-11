@@ -73,3 +73,7 @@ end
 gem "inertia_rails", "~> 3.22"
 
 gem "vite_rails", "~> 3.11"
+
+gem "roo", "~> 3.0"
+
+gem "caxlsx", "~> 4.5", group: :test
