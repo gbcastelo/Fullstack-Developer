@@ -1,4 +1,4 @@
-import { Head, useForm, usePage } from '@inertiajs/react'
+import { Head, Link, useForm, usePage } from '@inertiajs/react'
 
 export default function New() {
   const { flash } = usePage().props
@@ -23,6 +23,7 @@ export default function New() {
           <span className="text-sm text-gray-700">Email</span>
           <input
             type="email"
+            required
             value={data.email_address}
             onChange={e => setData('email_address', e.target.value)}
             placeholder="Email"
@@ -33,6 +34,7 @@ export default function New() {
           <span className="text-sm text-gray-700">Password</span>
           <input
             type="password"
+            required
             value={data.password}
             onChange={e => setData('password', e.target.value)}
             placeholder="Password"
@@ -42,6 +44,9 @@ export default function New() {
         <button disabled={processing} type="submit" className="w-full bg-blue-600 text-white rounded px-3 py-2">
           Sign in
         </button>
+        <Link href="/register" className="block text-center text-sm text-blue-600">
+          Create an account
+        </Link>
       </form>
     </div>
   )

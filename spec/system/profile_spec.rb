@@ -3,14 +3,6 @@ require "rails_helper"
 RSpec.describe "Profile", type: :system do
   let(:user) { create(:user, password: "password123") }
 
-  def sign_in(user)
-    visit new_session_path
-    fill_in_reliably "Email", with: user.email_address
-    fill_in_reliably "Password", with: "password123"
-    click_button "Sign in"
-    expect(page).to have_current_path(profile_path)
-  end
-
   it "lets a user edit their own full name" do
     sign_in(user)
     visit "/profile/edit"

@@ -50,6 +50,12 @@ end
 
 Capybara.javascript_driver = :headless_chrome
 Capybara.default_driver = :headless_chrome
+# ponytail: this sandbox's default 2s wait can be too short under CPU load
+# (same contention behind the fill_in race above), letting a slow Inertia
+# redirect/render fail a have_current_path assertion that would pass a beat
+# later. A longer wait is a one-line fix for every current-path/content
+# assertion in every system spec; revisit if specs still flake past this.
+Capybara.default_max_wait_time = 5
 
 module ReliableFillIn
   # ponytail: under CPU load in this sandbox, Selenium's fast synthetic
@@ -68,6 +74,22 @@ module ReliableFillIn
   end
 end
 
+module SystemSessionHelpers
+  # Shared sign-in flow for system specs. Uses fill_in_reliably for both
+  # fields and waits for the post-login redirect to complete before
+  # returning -- without that wait-assertion, a spec can start interacting
+  # with the page before the redirect lands (the same login-redirect race
+  # that caused a real flake in this project).
+  def sign_in(user, password: "password123")
+    visit new_session_path
+    fill_in_reliably "Email", with: user.email_address
+    fill_in_reliably "Password", with: password
+    click_button "Sign in"
+    expect(page).to have_current_path(user.admin? ? dashboard_path : profile_path)
+  end
+end
+
 RSpec.configure do |config|
   config.include ReliableFillIn, type: :system
+  config.include SystemSessionHelpers, type: :system
 end
