@@ -31,8 +31,12 @@ Once running, visit `/register` to create an account, or `/session/new`
 (also the root path) to log in with a seeded account below. A logged-in
 admin lands on the dashboard (`/dashboard`, placeholder for now); a
 logged-in regular user lands on their profile (`/profile`), which can be
-edited at `/profile/edit` (including uploading an avatar) or deleted from
-there.
+edited at `/profile/edit` (currently full name only) or deleted from there.
+Avatar upload is modeled server-side (`ActiveStorage`, validated
+content-type/size) but has no UI yet in this stage; the design spec scoped
+avatar to file-upload-only (no remote-URL input) — see
+`docs/superpowers/specs/2026-09-11-user-management-app-design.md` for
+details.
 
 Default seeded accounts (see `db/seeds.rb`):
 - Admin: `admin@umanni.test` / `password123`
