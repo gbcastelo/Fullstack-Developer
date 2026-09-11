@@ -43,4 +43,21 @@ RSpec.describe ImportUsersJob, type: :job do
     ImportUsersJob.perform_now(blob.signed_id)
     expect(ActiveStorage::Blob.exists?(blob.id)).to be false
   end
+
+  it "broadcasts progress as it processes rows" do
+    blob = blob_for("users_import.csv", "text/csv")
+
+    expect {
+      ImportUsersJob.perform_now(blob.signed_id)
+    }.to have_broadcasted_to("imports").at_least(3).times
+    # start, per-row (x2), done — at least 3
+  end
+
+  it "broadcasts a final status of done with the total and any errors" do
+    blob = blob_for("users_import_with_errors.csv", "text/csv")
+
+    expect {
+      ImportUsersJob.perform_now(blob.signed_id)
+    }.to have_broadcasted_to("imports").with(hash_including(status: "done", processed: 3))
+  end
 end
