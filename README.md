@@ -1,32 +1,66 @@
-# README
+### AI Usage Disclosure
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Parts of this project (backend and frontend code, tests, and this
+documentation) were generated and refined with assistance from **Claude
+Sonnet 5** (Anthropic), used as a coding assistant throughout development,
+per Umanni's AI Policy in the test instructions.
 
-Things you may want to cover:
+# Umanni User Management App
 
-* Ruby version
+A Rails 8 + Inertia.js/React application for managing users with role-based
+access, a real-time admin dashboard, and async spreadsheet import.
 
-* System dependencies
+## Stack
 
-* Configuration
+- Ruby 3.4.10, Rails ~> 8.1 (the README asked for Ruby 4.0+, which has not
+  been released as a stable version; 3.4.10 is the latest stable 3.x).
+- PostgreSQL
+- Inertia.js + React (Vite), Tailwind CSS
+- Solid Queue / Solid Cable (no Redis)
+- RSpec, FactoryBot, Capybara + Selenium, SimpleCov (90% minimum coverage)
 
-* Database creation
+## Setup
 
-* Database initialization
+```bash
+bundle install
+bin/rails db:create db:migrate db:seed
+bin/dev # boots Rails + Vite
+```
 
-* How to run the test suite
+Once running, visit `/register` to create an account, or `/session/new`
+(also the root path) to log in with a seeded account below. A logged-in
+admin lands on the dashboard (`/dashboard`, placeholder for now); a
+logged-in regular user lands on their profile (`/profile`), which can be
+edited at `/profile/edit` (including uploading an avatar) or deleted from
+there.
 
-* Services (job queues, cache servers, search engines, etc.)
+Default seeded accounts (see `db/seeds.rb`):
+- Admin: `admin@umanni.test` / `password123`
+- Users: `user1@umanni.test` .. `user3@umanni.test` / `password123`
 
-* Deployment instructions
+## Running tests
 
-* ...
+```bash
+bin/rspec
+```
 
-## Local development (this sandbox)
+## Docker
 
-This sandbox has no root/sudo, so Postgres and the Ruby native-extension
-toolchain are **not** installed via `apt`/system services:
+```bash
+docker compose up
+```
+
+(Docker/Kamal details are finalized in a later stage of this project.)
+
+## Local development notes (this sandbox)
+
+This sandbox has no root/sudo, so Postgres, the Ruby native-extension
+toolchain, and headless Chrome are **not** installed via `apt`/system
+services. None of this applies on a normal machine with `apt install
+build-essential libpq-dev` and Chrome/Chromium available (or a CI image like
+GitHub Actions' `ubuntu-latest`, which ships Chrome).
+
+### Postgres and the Ruby/gcc toolchain
 
 - **Postgres** runs as a Docker container instead of a system service:
   ```bash
@@ -44,24 +78,24 @@ toolchain are **not** installed via `apt`/system services:
   user-space C toolchain assembled by `apt-get download`-ing `gcc-14`/`make`/
   `libpq-dev` `.deb`s and extracting them (`dpkg-deb -x`, no root needed) into
   `~/.local/toolchain`; `~/.local/toolchain/env.sh` puts that on `PATH` and
-  sets `LD_LIBRARY_PATH`. A normal machine with `build-essential` and
-  `libpq-dev` installed via `apt` needs none of this.
-- **Headless Chrome** (for `spec/system/*`, driven by Capybara/Selenium): no
-  `google-chrome`/`chromium` package is installable without `apt`, so Chrome
-  for Testing was fetched as a portable build via `npx puppeteer browsers
-  install chrome` (extracted manually with Python's `zipfile` into
-  `~/.cache/puppeteer/chrome/<version>/chrome-linux64/` since `unzip` isn't
-  available either), its missing shared libs (`libnspr4`, `libnss3`,
-  `libasound2t64`, and friends — not on the base image) were pulled as
-  `noble` `.deb`s from `archive.ubuntu.com` and extracted with `dpkg-deb -x`
-  into `~/.local/chrome-libs`, and `chmod +x` was applied to
-  `chrome_crashpad_handler` inside the extracted build (its executable bit
-  doesn't survive the zip). To run system specs in this sandbox:
-  ```bash
-  export LD_LIBRARY_PATH="$HOME/.local/chrome-libs"
-  export PATH="$HOME/.cache/puppeteer/chrome/<version>/chrome-linux64:$PATH"
-  bin/rspec spec/system
-  ```
-  A normal machine with Chrome/Chromium installed via `apt` (or a CI image
-  like GitHub Actions' `ubuntu-latest`, which ships Chrome) needs none of
-  this.
+  sets `LD_LIBRARY_PATH`.
+
+### Headless Chrome
+
+For `spec/system/*`, driven by Capybara/Selenium: no `google-chrome`/
+`chromium` package is installable without `apt`, so Chrome for Testing was
+fetched as a portable build via `npx puppeteer browsers install chrome`
+(extracted manually with Python's `zipfile` into
+`~/.cache/puppeteer/chrome/<version>/chrome-linux64/` since `unzip` isn't
+available either), its missing shared libs (`libnspr4`, `libnss3`,
+`libasound2t64`, and friends — not on the base image) were pulled as
+`noble` `.deb`s from `archive.ubuntu.com` and extracted with `dpkg-deb -x`
+into `~/.local/chrome-libs`, and `chmod +x` was applied to
+`chrome_crashpad_handler` inside the extracted build (its executable bit
+doesn't survive the zip). To run system specs in this sandbox:
+
+```bash
+export LD_LIBRARY_PATH="$HOME/.local/chrome-libs"
+export PATH="$HOME/.cache/puppeteer/chrome/<version>/chrome-linux64:$PATH"
+bin/rspec spec/system
+```
