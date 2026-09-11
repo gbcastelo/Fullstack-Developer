@@ -11,16 +11,20 @@ RSpec.describe "Admin Users CRUD", type: :system do
     fill_in_reliably "Full name", with: "Test Target"
     fill_in_reliably "Email", with: "target@example.com"
     fill_in_reliably "Password", with: "password123"
-    click_button "Create"
+    click_reliably(wait_for: -> { page.has_current_path?(users_path) }) { click_button "Create" }
 
     expect(page).to have_current_path(users_path)
     expect(page).to have_content("Test Target")
 
-    within("tr", text: "Test Target") { click_button "Toggle role" }
+    click_reliably(wait_for: -> { page.has_content?("admin", count: 2) }) do
+      within("tr", text: "Test Target") { click_button "Toggle role" }
+    end
     expect(page).to have_content("admin", count: 2) # seeded admin + toggled target
 
-    accept_confirm do
-      within("tr", text: "Test Target") { click_button "Delete" }
+    click_reliably(wait_for: -> { page.has_no_content?("Test Target") }) do
+      accept_confirm do
+        within("tr", text: "Test Target") { click_button "Delete" }
+      end
     end
     expect(page).not_to have_content("Test Target")
   end

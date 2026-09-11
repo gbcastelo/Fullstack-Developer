@@ -72,6 +72,39 @@ module ReliableFillIn
       end
     end
   end
+
+  # ponytail: same click-vs-render race as fill_in_reliably above, but for a
+  # click whose only observable trace is a side effect (a request fires, the
+  # page navigates, a row disappears) rather than a field value we can read
+  # back. Under CPU load a synthetic click can land before the page is fully
+  # interactive and produce no effect at all -- nothing to inspect, just a
+  # click that silently did nothing.
+  #
+  # `wait_for` is a Capybara predicate (e.g. `-> { page.has_current_path?(path) }`)
+  # called with Capybara's own default wait (Capybara.default_max_wait_time),
+  # so a click that DID register gets a full, generous window to show its
+  # effect before we give up on it -- retrying too eagerly (e.g. on a short
+  # per-attempt wait) risks firing the click again while the first one is
+  # still legitimately in flight, double-submitting a form. Only once a
+  # whole wait window has passed with no effect do we assume the click
+  # itself was lost and try again, up to `attempts` times. Wrap an
+  # `accept_confirm` around the click in the block if the click triggers a
+  # JS confirm dialog -- `Capybara::ModalNotFound` (no dialog appeared,
+  # because no click registered) is treated as "retry" like any other missed
+  # effect. Revisit if a newer selenium-webdriver/chromedriver pairing fixes
+  # the race upstream.
+  def click_reliably(wait_for:, attempts: 5, &click)
+    attempts.times do
+      begin
+        click.call
+      rescue Capybara::ModalNotFound
+        # The click that should have opened the confirm dialog never
+        # registered -- fall through to retry below.
+      end
+      return if wait_for.call
+    end
+    raise "click_reliably: expected effect never happened after #{attempts} attempts"
+  end
 end
 
 module SystemSessionHelpers
