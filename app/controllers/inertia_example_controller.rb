@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class InertiaExampleController < InertiaController
+  allow_unauthenticated_access
+
   def index
     render inertia: {
       rails_version: Rails.version,
