@@ -21,6 +21,7 @@ export default function New() {
         <label className="block">
           <span className="text-sm text-gray-700">Full name</span>
           <input
+            required
             value={data.full_name}
             onChange={e => setData('full_name', e.target.value)}
             placeholder="Full name"
@@ -32,6 +33,7 @@ export default function New() {
           <span className="text-sm text-gray-700">Email</span>
           <input
             type="email"
+            required
             value={data.email_address}
             onChange={e => setData('email_address', e.target.value)}
             placeholder="Email"
@@ -43,6 +45,7 @@ export default function New() {
           <span className="text-sm text-gray-700">Password</span>
           <input
             type="password"
+            required
             value={data.password}
             onChange={e => setData('password', e.target.value)}
             placeholder="Password"
