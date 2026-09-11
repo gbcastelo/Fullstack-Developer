@@ -46,3 +46,22 @@ toolchain are **not** installed via `apt`/system services:
   `~/.local/toolchain`; `~/.local/toolchain/env.sh` puts that on `PATH` and
   sets `LD_LIBRARY_PATH`. A normal machine with `build-essential` and
   `libpq-dev` installed via `apt` needs none of this.
+- **Headless Chrome** (for `spec/system/*`, driven by Capybara/Selenium): no
+  `google-chrome`/`chromium` package is installable without `apt`, so Chrome
+  for Testing was fetched as a portable build via `npx puppeteer browsers
+  install chrome` (extracted manually with Python's `zipfile` into
+  `~/.cache/puppeteer/chrome/<version>/chrome-linux64/` since `unzip` isn't
+  available either), its missing shared libs (`libnspr4`, `libnss3`,
+  `libasound2t64`, and friends — not on the base image) were pulled as
+  `noble` `.deb`s from `archive.ubuntu.com` and extracted with `dpkg-deb -x`
+  into `~/.local/chrome-libs`, and `chmod +x` was applied to
+  `chrome_crashpad_handler` inside the extracted build (its executable bit
+  doesn't survive the zip). To run system specs in this sandbox:
+  ```bash
+  export LD_LIBRARY_PATH="$HOME/.local/chrome-libs"
+  export PATH="$HOME/.cache/puppeteer/chrome/<version>/chrome-linux64:$PATH"
+  bin/rspec spec/system
+  ```
+  A normal machine with Chrome/Chromium installed via `apt` (or a CI image
+  like GitHub Actions' `ubuntu-latest`, which ships Chrome) needs none of
+  this.
