@@ -10,4 +10,10 @@ class ApplicationController < ActionController::Base
   # `flash` prop, so React pages can render it instead of it disappearing
   # silently after a redirect.
   inertia_share flash: -> { flash.to_hash }
+
+  private
+
+  def require_admin!
+    redirect_to profile_path, alert: "You are not authorized to view this page." unless Current.user.admin?
+  end
 end
