@@ -1,7 +1,8 @@
-import { Head, useForm } from '@inertiajs/react'
+import { Head, useForm, usePage } from '@inertiajs/react'
 
 export default function New() {
-  const { data, setData, post, processing, errors } = useForm({
+  const { flash } = usePage().props
+  const { data, setData, post, processing } = useForm({
     email_address: '',
     password: '',
   })
@@ -16,6 +17,8 @@ export default function New() {
       <Head title="Sign in" />
       <form onSubmit={submit} className="bg-white p-8 rounded shadow w-full max-w-sm space-y-4">
         <h1 className="text-xl font-semibold">Sign in</h1>
+        {flash?.alert && <p className="text-red-600 text-sm">{flash.alert}</p>}
+        {flash?.notice && <p className="text-green-600 text-sm">{flash.notice}</p>}
         <label className="block">
           <span className="text-sm text-gray-700">Email</span>
           <input
@@ -36,7 +39,6 @@ export default function New() {
             className="mt-1 w-full border rounded px-3 py-2"
           />
         </label>
-        {errors.email_address && <p className="text-red-600 text-sm">{errors.email_address}</p>}
         <button disabled={processing} type="submit" className="w-full bg-blue-600 text-white rounded px-3 py-2">
           Sign in
         </button>
