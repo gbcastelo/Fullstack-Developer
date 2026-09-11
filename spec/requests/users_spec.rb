@@ -9,8 +9,16 @@ RSpec.describe "Users (admin)", type: :request do
 
   it "blocks non-admins from every action" do
     user = create(:user, password: "password123")
+    target = create(:user, password: "password123")
     sign_in(user)
+
     get users_path
+    expect(response).to redirect_to(profile_path)
+
+    post users_path, params: { user: { full_name: "New", email_address: "new@example.com", password: "password123", role: "admin" } }
+    expect(response).to redirect_to(profile_path)
+
+    patch toggle_role_user_path(target)
     expect(response).to redirect_to(profile_path)
   end
 
@@ -20,6 +28,12 @@ RSpec.describe "Users (admin)", type: :request do
     it "lists users" do
       create_list(:user, 2, password: "password123")
       get users_path
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "renders the edit form" do
+      target = create(:user, password: "password123")
+      get edit_user_path(target)
       expect(response).to have_http_status(:ok)
     end
 
@@ -50,6 +64,19 @@ RSpec.describe "Users (admin)", type: :request do
       expect(target.reload.role).to eq("admin")
       patch toggle_role_user_path(target)
       expect(target.reload.role).to eq("user")
+    end
+
+    it "refuses to delete their own account" do
+      expect { delete user_path(admin) }.not_to change(User, :count)
+      expect(response).to redirect_to(users_path)
+      expect(flash[:alert]).to eq("You cannot delete or change your own role here.")
+    end
+
+    it "refuses to toggle their own role" do
+      patch toggle_role_user_path(admin)
+      expect(admin.reload.role).to eq("admin")
+      expect(response).to redirect_to(users_path)
+      expect(flash[:alert]).to eq("You cannot delete or change your own role here.")
     end
   end
 end

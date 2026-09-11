@@ -1,6 +1,7 @@
 class UsersController < ApplicationController
   before_action :require_admin!
   before_action :set_user, only: %i[edit update destroy toggle_role]
+  before_action :prevent_self_modification, only: %i[destroy toggle_role]
 
   def index
     render inertia: "users/index", props: { users: user_list }
@@ -45,6 +46,12 @@ class UsersController < ApplicationController
 
   def set_user
     @user = User.find(params[:id])
+  end
+
+  def prevent_self_modification
+    return unless @user == Current.user
+
+    redirect_to users_path, alert: "You cannot delete or change your own role here."
   end
 
   def user_list

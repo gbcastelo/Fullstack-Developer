@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   post "register", to: "registrations#create"
   resource :profile, only: %i[show edit update destroy], controller: "profiles"
   get "dashboard", to: "dashboard#show"
-  resources :users do
+  resources :users, only: %i[index new create edit update destroy] do
     member { patch :toggle_role }
   end
 
