@@ -1,2 +1,5 @@
 # AI process artifacts (specs/plans) — internal use only, not shipped in the final repo
 docs/superpowers/
+
+# local worktrees for isolated feature development
+.worktrees/
