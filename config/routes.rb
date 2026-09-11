@@ -4,6 +4,9 @@ Rails.application.routes.draw do
   post "register", to: "registrations#create"
   resource :profile, only: %i[show edit update destroy], controller: "profiles"
   get "dashboard", to: "dashboard#show"
+  resources :users do
+    member { patch :toggle_role }
+  end
 
   # Redirect to localhost from 127.0.0.1 to use same IP address with Vite server
   constraints(host: "127.0.0.1") do
