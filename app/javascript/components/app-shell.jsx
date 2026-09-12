@@ -84,7 +84,7 @@ export function AppShell({ children, title }) {
           <div className="flex items-center gap-2">
             <button
               onClick={toggleLocale}
-              aria-label="Toggle language"
+              aria-label={t('nav.toggleLanguage')}
               title={locale === 'pt-BR' ? 'English' : 'Português'}
               className="flex items-center gap-1.5 rounded-md border border-border px-2 py-2 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             >
@@ -93,7 +93,7 @@ export function AppShell({ children, title }) {
             </button>
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              aria-label="Toggle theme"
+              aria-label={t('nav.toggleTheme')}
               className="rounded-md border border-border p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             >
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}

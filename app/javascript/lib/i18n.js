@@ -12,6 +12,8 @@ const dictionaries = {
       importUsers: 'Import users',
       myProfile: 'My profile',
       signOut: 'Sign out',
+      toggleLanguage: 'Toggle language',
+      toggleTheme: 'Toggle theme',
     },
     role: { admin: 'admin', user: 'user' },
     sessions: {
@@ -64,6 +66,9 @@ const dictionaries = {
       edit: 'Edit',
       toggleRole: 'Toggle role',
       delete: 'Delete',
+      // The only function-valued entry in this dictionary (needs the user's
+      // name interpolated) -- call it as t('users.confirmDelete')(name), not
+      // as a plain t() result.
       confirmDelete: name => `Delete ${name}?`,
       fullName: 'Full name',
       password: 'Password',
@@ -86,6 +91,8 @@ const dictionaries = {
       importUsers: 'Importar usuários',
       myProfile: 'Meu perfil',
       signOut: 'Sair',
+      toggleLanguage: 'Alternar idioma',
+      toggleTheme: 'Alternar tema',
     },
     role: { admin: 'admin', user: 'usuário' },
     sessions: {
