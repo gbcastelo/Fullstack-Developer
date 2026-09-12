@@ -1,4 +1,5 @@
 require "simplecov"
+SimpleCov.command_name "rspec_#{ENV['TEST_ENV_NUMBER'] || 1}"
 SimpleCov.start "rails" do
   skip "/spec/"
   skip "/config/"

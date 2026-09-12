@@ -50,6 +50,10 @@ end
 
 Capybara.javascript_driver = :headless_chrome
 Capybara.default_driver = :headless_chrome
+# Give each parallel_tests worker its own server port so concurrent system
+# specs don't collide on the same port (ENV["TEST_ENV_NUMBER"] is blank for
+# worker 1, "2", "3", ... for the rest).
+Capybara.server_port = 9887 + ENV["TEST_ENV_NUMBER"].to_i
 # ponytail: this sandbox's default 2s wait can be too short under CPU load
 # (same contention behind the fill_in race above), letting a slow Inertia
 # redirect/render fail a have_current_path assertion that would pass a beat

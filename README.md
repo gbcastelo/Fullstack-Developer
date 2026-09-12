@@ -55,6 +55,14 @@ Default seeded accounts (see `db/seeds.rb`):
 bin/rspec
 ```
 
+For faster runs, the suite can also be split across parallel workers with
+[`parallel_tests`](https://github.com/grosser/parallel_tests):
+
+```bash
+bundle exec rails parallel:create parallel:load_schema # one-time setup
+bundle exec parallel_rspec spec/
+```
+
 ## Docker
 
 ```bash
@@ -90,6 +98,10 @@ GitHub Actions' `ubuntu-latest`, which ships Chrome).
   `libpq-dev` `.deb`s and extracting them (`dpkg-deb -x`, no root needed) into
   `~/.local/toolchain`; `~/.local/toolchain/env.sh` puts that on `PATH` and
   sets `LD_LIBRARY_PATH`.
+- **Parallel tests**: CI runs `parallel_rspec` at the default worker count
+  (one per core). This sandbox has limited resources for running several
+  headless Chrome instances at once, so use a lower count here, e.g.
+  `bundle exec parallel_rspec spec/ -n 2`.
 
 ### Headless Chrome
 
