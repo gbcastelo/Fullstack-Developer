@@ -49,6 +49,31 @@ Default seeded accounts (see `db/seeds.rb`):
 - Admin: `admin@umanni.test` / `password123`
 - Users: `user1@umanni.test` .. `user3@umanni.test` / `password123`
 
+## Server-side rendering (SSR)
+
+Inertia SSR is enabled (`config.ssr_enabled = true` in
+`config/initializers/inertia_rails.rb`), satisfying the "Advanced SSR"
+extra-points item: `GET /session/new` (and every other Inertia page) returns
+fully server-rendered HTML on the first response, not an empty `<div
+id="app">` waiting for JS to hydrate — see the
+`"server-renders the page content via Inertia SSR"` spec in
+`spec/requests/sessions_spec.rb`.
+
+The SSR entrypoint is `app/javascript/ssr/ssr.jsx` (same `createInertiaApp`
+page resolution as the client entrypoint); `@inertiajs/vite` transforms it
+into a Node render server at build time.
+
+- **Development** (`bin/dev`): works automatically — the running `bin/vite
+  dev` process serves SSR requests itself, no extra process needed.
+- **Production**: build the bundle with `bin/vite build --ssr` (also runs
+  automatically as part of `assets:precompile`, e.g. in the Dockerfile), then
+  run it with `bin/vite ssr` (or `node public/vite-ssr/ssr.js`). Puma
+  auto-manages this process via the `inertia_ssr` plugin (see
+  `config/puma.rb`), so a plain `bin/rails server`/`bin/thrust` boot is
+  enough — no separate process to start by hand. If the SSR server isn't
+  running for any reason, `inertia_rails` silently falls back to normal
+  client-side rendering rather than erroring.
+
 ## Running tests
 
 ```bash

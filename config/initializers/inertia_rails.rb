@@ -6,4 +6,11 @@ InertiaRails.configure do |config|
   config.always_include_errors_hash = true
   config.use_script_element_for_initial_page = true
   config.use_data_inertia_head_attribute = true
+
+  # Server-side rendering. Safe to enable everywhere: when the SSR bundle
+  # isn't running (e.g. it hasn't been built yet), inertia_rails silently
+  # falls back to the normal client-rendered response instead of raising.
+  # Build: bin/vite build --ssr (or `RAILS_ENV=production bin/rails assets:precompile`)
+  # Run:   bin/vite ssr
+  config.ssr_enabled = true
 end

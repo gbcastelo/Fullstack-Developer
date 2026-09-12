@@ -67,6 +67,15 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 # Final stage for app image
 FROM base
 
+# Node runtime to run the pre-built Inertia SSR bundle (public/vite-ssr/ssr.js,
+# produced during assets:precompile above). The bundle has all npm deps
+# inlined (see vite.config.ts `ssr.noExternal`), so only a bare `node` binary
+# is needed here — no node_modules in the final image.
+RUN apt-get update -qq && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install --no-install-recommends -y nodejs && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash

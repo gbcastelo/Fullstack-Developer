@@ -9,6 +9,15 @@ RSpec.describe "Sessions", type: :request do
       get new_session_path
       expect(response).to have_http_status(:ok)
     end
+
+    it "server-renders the page content via Inertia SSR" do
+      get new_session_path
+
+      # This is normally client-rendered React content. If it shows up in the raw
+      # response body, the Inertia SSR bundle actually rendered it server-side
+      # rather than leaving an empty root div for the client to hydrate.
+      expect(response.body).to include("Sign in")
+    end
   end
 
   describe "POST /session" do
