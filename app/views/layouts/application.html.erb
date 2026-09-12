@@ -1,6 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html class="dark">
   <head>
+    <script>
+      // Applied before first paint, on every page (not just ones that mount
+      // AppShell/useTheme), so the light/dark class is correct immediately
+      // instead of only after a page happens to run the theme hook. `dark`
+      // is the app-wide default; a stored preference overrides it.
+      (function () {
+        try {
+          var theme = localStorage.getItem('theme') || 'dark'
+          document.documentElement.classList.toggle('dark', theme === 'dark')
+        } catch (e) {}
+      })()
+    </script>
     <title data-inertia><%= content_for(:title) || "Feature User Management App" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
