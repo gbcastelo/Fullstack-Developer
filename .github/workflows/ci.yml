@@ -105,6 +105,23 @@ jobs:
       - name: Install JS dependencies
         run: npm ci
 
+      - name: Build and start the Inertia SSR server
+        # spec/requests/sessions_spec.rb asserts a real server-rendered response,
+        # so the SSR bundle must be built and its Node server running (port 13714,
+        # inertia_rails' default) before specs run — otherwise that spec fails.
+        run: |
+          bin/vite build --ssr --force
+          node public/vite-ssr/ssr.js &
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:13714/health > /dev/null; then
+              echo "Inertia SSR server is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Inertia SSR server did not become healthy in time" >&2
+          exit 1
+
       - name: Run tests
         env:
           RAILS_ENV: test

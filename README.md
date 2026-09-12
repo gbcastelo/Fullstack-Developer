@@ -74,6 +74,15 @@ into a Node render server at build time.
   running for any reason, `inertia_rails` silently falls back to normal
   client-side rendering rather than erroring.
 
+The `"server-renders the page content via Inertia SSR"` spec in
+`spec/requests/sessions_spec.rb` needs the SSR bundle built and its server
+running to pass — on a clean checkout (or in CI, see `.github/workflows/ci.yml`),
+run `bin/vite build --ssr --force` (`--force` avoids a stale
+`tmp/cache/vite` skipping the rebuild if `public/vite-ssr/` was removed
+without touching any source files) and `node public/vite-ssr/ssr.js &`
+before `bin/rspec`; without it, that one spec falls back to an empty
+`<div id="app">` and fails (every other spec is unaffected).
+
 ## Running tests
 
 ```bash
