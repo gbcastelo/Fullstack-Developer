@@ -7,82 +7,82 @@ per Umanni's AI Policy in the test instructions.
 
 # Umanni User Management App
 
-A Rails 8 + Inertia.js/React application for managing users with role-based
-access, a real-time admin dashboard, and async spreadsheet import.
+A Rails 8 + Inertia.js/React app for managing users: an admin dashboard with
+live counts, full user CRUD with role management, bulk import from a
+spreadsheet, and self-service profiles — built with Ruby 3.4.10 and Rails
+~> 8.1 (the brief asked for Ruby 4.0+, which hasn't shipped a stable release;
+3.4.10 is the closest real equivalent).
 
-## Stack
+## Getting started
 
-- Ruby 3.4.10, Rails ~> 8.1 (the README asked for Ruby 4.0+, which has not
-  been released as a stable version; 3.4.10 is the latest stable 3.x).
-- PostgreSQL
-- Inertia.js + React (Vite), Tailwind CSS
-- Solid Queue / Solid Cable (no Redis)
-- RSpec, FactoryBot, Capybara + Selenium, SimpleCov (90% minimum coverage)
-
-## Setup
+You'll need Ruby 3.4, Node 22, and PostgreSQL running locally (or use Docker
+for Postgres — see below).
 
 ```bash
 bundle install
 bin/rails db:create db:migrate db:seed
-bin/dev # boots Rails + Vite
+bin/dev   # boots Rails + Vite together
 ```
 
-Once running, visit `/register` to create an account, or `/session/new`
-(also the root path) to log in with a seeded account below. A logged-in
-admin lands on the dashboard (`/dashboard`), with real-time counts and a
-`/users` CRUD screen; a logged-in regular user lands on their profile
-(`/profile`), which can be edited at `/profile/edit` (full name and avatar)
-or deleted from there. Avatar upload is file-only (no remote-URL input, per
-the design spec) and validated server-side (`ActiveStorage`,
-content-type/size) — see
-`docs/superpowers/specs/2026-09-11-user-management-app-design.md` for
-details.
+No Postgres handy? Run one in Docker instead of installing it:
 
-From `/users`, an admin can also bulk-import users at `/imports/new` by
-uploading a `.csv` or `.xlsx` spreadsheet (parsed with the `roo` gem). Rows
-are created asynchronously via Solid Queue, with live progress (processed
-count, status, and any per-row errors) streamed back over Solid Cable to the
-import page; invalid rows are skipped and reported rather than aborting the
-whole import. A ready-to-use sample file is included at
-[`sample_users_import.csv`](sample_users_import.csv) for trying this out.
+```bash
+docker run -d --name umanni-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:16
+```
 
-Default seeded accounts (see `db/seeds.rb`):
-- Admin: `admin@umanni.test` / `password123`
-- Users: `user1@umanni.test` .. `user3@umanni.test` / `password123`
+Then open **http://localhost:3000** and log in with a seeded account:
 
-## Server-side rendering (SSR)
+| Role  | Email                  | Password      |
+|-------|------------------------|---------------|
+| Admin | `admin@umanni.test`    | `password123` |
+| User  | `user1@umanni.test`    | `password123` |
 
-Inertia SSR is enabled (`config.ssr_enabled = true` in
-`config/initializers/inertia_rails.rb`), satisfying the "Advanced SSR"
-extra-points item: `GET /session/new` (and every other Inertia page) returns
-fully server-rendered HTML on the first response, not an empty `<div
-id="app">` waiting for JS to hydrate — see the
-`"server-renders the page content via Inertia SSR"` spec in
-`spec/requests/sessions_spec.rb`.
+(`user2@umanni.test`/`user3@umanni.test` also exist — see `db/seeds.rb`.)
+New visitors can also self-register at `/register`.
 
-The SSR entrypoint is `app/javascript/ssr/ssr.jsx` (same `createInertiaApp`
-page resolution as the client entrypoint); `@inertiajs/vite` transforms it
-into a Node render server at build time.
+## Taking a tour
 
-- **Development** (`bin/dev`): works automatically — the running `bin/vite
-  dev` process serves SSR requests itself, no extra process needed.
-- **Production**: build the bundle with `bin/vite build --ssr` (also runs
-  automatically as part of `assets:precompile`, e.g. in the Dockerfile), then
-  run it with `bin/vite ssr` (or `node public/vite-ssr/ssr.js`). Puma
-  auto-manages this process via the `inertia_ssr` plugin (see
-  `config/puma.rb`), so a plain `bin/rails server`/`bin/thrust` boot is
-  enough — no separate process to start by hand. If the SSR server isn't
-  running for any reason, `inertia_rails` silently falls back to normal
-  client-side rendering rather than erroring.
+- **As the admin**, you land on `/dashboard` after login: live user counts
+  (updates in real time, no refresh needed) and a link to `/users`, where you
+  can list, create, edit, and delete users, or toggle anyone's role. From
+  there, **Import users** (`/imports/new`) lets you upload a `.csv`/`.xlsx`
+  and watch it process live — a ready-to-use example is included at
+  [`sample_users_import.csv`](sample_users_import.csv), so you can try it
+  immediately without preparing your own file. Invalid rows are reported and
+  skipped rather than failing the whole import.
+- **As a regular user**, you land on your own profile: edit your name and
+  avatar, or delete your account. Nothing outside your own record is
+  reachable.
+- The theme toggle (top right) and the **EN / PT** language switch next to
+  it work everywhere in the app, not just on one page.
 
-The `"server-renders the page content via Inertia SSR"` spec in
-`spec/requests/sessions_spec.rb` needs the SSR bundle built and its server
-running to pass — on a clean checkout (or in CI, see `.github/workflows/ci.yml`),
-run `bin/vite build --ssr --force` (`--force` avoids a stale
-`tmp/cache/vite` skipping the rebuild if `public/vite-ssr/` was removed
-without touching any source files) and `node public/vite-ssr/ssr.js &`
-before `bin/rspec`; without it, that one spec falls back to an empty
-`<div id="app">` and fails (every other spec is unaffected).
+## A few things added beyond what was asked
+
+Not required by the brief, but cheap enough to include along the way — noted
+here so they don't go unnoticed rather than to make a big deal of them:
+
+- A light/dark theme toggle (defaults to dark) and an English/Portuguese
+  (pt-BR) language toggle, both applied app-wide.
+- An actual small UI kit (buttons, cards, tables, a sidebar layout) instead
+  of bare unstyled forms.
+- Click-to-change avatar upload with an instant local preview, and the same
+  "see what you picked before you commit" treatment for the CSV/XLSX import
+  (filename, size, drag-and-drop).
+- A custom app icon instead of the Rails default placeholder.
+- Server-side rendering (SSR) for Inertia + React — see below.
+- A Kamal 2 deploy config tailored to this app's real stack (Postgres, Solid
+  Queue/Cable), not Kamal's generic defaults.
+- `parallel_tests` actually wired up end-to-end (separate parallel test
+  databases, CI running the suite in parallel) rather than just sitting in
+  the Gemfile.
+
+## Stack
+
+- Ruby 3.4.10, Rails ~> 8.1
+- PostgreSQL
+- Inertia.js + React (Vite), Tailwind CSS
+- Solid Queue / Solid Cable (no Redis)
+- RSpec, FactoryBot, Capybara + Selenium, SimpleCov (90% minimum coverage)
 
 ## Running tests
 
@@ -98,6 +98,27 @@ bundle exec rails parallel:create parallel:load_schema # one-time setup
 bundle exec parallel_rspec spec/
 ```
 
+## Server-side rendering (SSR)
+
+Inertia SSR is enabled (`config.ssr_enabled = true` in
+`config/initializers/inertia_rails.rb`): `GET /session/new` (and every other
+Inertia page) returns fully server-rendered HTML on the first response,
+instead of an empty `<div id="app">` waiting for JS to hydrate — see the
+`"server-renders the page content via Inertia SSR"` spec in
+`spec/requests/sessions_spec.rb`.
+
+The SSR entrypoint is `app/javascript/ssr/ssr.jsx` (same page resolution as
+the client entrypoint); `@inertiajs/vite` turns it into a Node render server
+at build time.
+
+- **Development** (`bin/dev`): works automatically, no extra process needed.
+- **Production**: `bin/vite build --ssr` builds the bundle (also runs as
+  part of `assets:precompile`, e.g. in the Dockerfile); Puma then manages the
+  render server itself via the `inertia_ssr` plugin (`config/puma.rb`), so a
+  plain `bin/rails server`/`bin/thrust` boot is enough. If the SSR server
+  isn't running for any reason, `inertia_rails` quietly falls back to normal
+  client-side rendering instead of erroring.
+
 ## Docker
 
 ```bash
@@ -105,36 +126,33 @@ docker compose up
 ```
 
 The production image ([`Dockerfile`](Dockerfile)) is a standard Rails 8
-multi-stage build (gems/JS assets compiled in a `build` stage, copied into a
-slim runtime stage). It runs behind
-[Thruster](https://github.com/basecamp/thruster) (`gem "thruster"` in the
-Gemfile, `CMD ["./bin/thrust", "./bin/rails", "server"]`) as a zero-config
-HTTP proxy in front of Puma, handling asset caching/compression and
-X-Sendfile acceleration without extra web-server config. `docker build -t
-umanni .` has been verified to produce a working image end-to-end (gem
-install, JS asset build via Vite, asset precompile).
+multi-stage build, verified end-to-end (`docker build -t umanni .`: gem
+install, JS asset build via Vite, asset precompile). It runs behind
+[Thruster](https://github.com/basecamp/thruster) as a zero-config HTTP proxy
+in front of Puma.
 
 ### Kamal 2 deployment
 
 [`config/deploy.yml`](config/deploy.yml) is a ready-to-customize [Kamal
-2](https://kamal-deploy.org) config for this app specifically — service
-name, and a Postgres `accessory` + `DB_HOST`/database-password env vars
-matching this app's actual stack (Postgres, Solid Queue/Solid Cable, no
-Redis) instead of Kamal's generic SQLite/MySQL/Redis defaults.
-`RAILS_MASTER_KEY` is wired through `.kamal/secrets` the same way
-`.github/workflows/ci.yml` supplies it in CI. There is no live server to
-deploy this app to, so `image:`, `registry:`, and the server/accessory IPs
-are clearly-marked placeholders — a real registry and real hosts must be
-filled in before `bin/kamal deploy` would actually work. Validated with
-`bundle exec kamal config`.
+2](https://kamal-deploy.org) config already shaped for this app (Postgres
+accessory, Solid Queue/Cable, no Redis). There's no live server to deploy
+to, so `image:`, `registry:`, and the host IPs are clearly-marked
+placeholders — fill in a real registry and real hosts before `bin/kamal
+deploy`. Validated with `bundle exec kamal config`.
 
-## Local development notes (this sandbox)
+---
 
-This sandbox has no root/sudo, so Postgres, the Ruby native-extension
-toolchain, and headless Chrome are **not** installed via `apt`/system
-services. None of this applies on a normal machine with `apt install
-build-essential libpq-dev` and Chrome/Chromium available (or a CI image like
-GitHub Actions' `ubuntu-latest`, which ships Chrome).
+## Development notes for this sandbox
+
+The rest of this document is only relevant if you're running inside the
+specific sandboxed environment this project was built in (no root/sudo). On
+a normal machine with `apt install build-essential libpq-dev` and
+Chrome/Chromium available (or a CI image like GitHub Actions'
+`ubuntu-latest`), none of this applies — just follow **Getting started**
+above.
+
+<details>
+<summary>Postgres, Ruby/gcc toolchain, and headless Chrome workarounds</summary>
 
 ### Postgres and the Ruby/gcc toolchain
 
@@ -149,7 +167,7 @@ GitHub Actions' `ubuntu-latest`, which ships Chrome).
   expects it on `localhost:5432` with user/password `postgres`/`postgres`
   (overridable via `DB_HOST`/`DB_USERNAME`/`DB_PASSWORD`).
 - **Ruby/gcc**: installed via [mise](https://mise.jdx.dev) (`mise use -g
-  ruby@3.4.10 node@22`). Since no `apt install build-essential` was possible
+  ruby@3.4.10 node@22`). Since `apt install build-essential` wasn't possible
   either, native gems (e.g. `websocket-driver`, `nio4r`) compile against a
   user-space C toolchain assembled by `apt-get download`-ing `gcc-14`/`make`/
   `libpq-dev` `.deb`s and extracting them (`dpkg-deb -x`, no root needed) into
@@ -179,3 +197,17 @@ export LD_LIBRARY_PATH="$HOME/.local/chrome-libs"
 export PATH="$HOME/.cache/puppeteer/chrome/<version>/chrome-linux64:$PATH"
 bin/rspec spec/system
 ```
+
+### Running the SSR-dependent spec on a clean checkout
+
+The `"server-renders the page content via Inertia SSR"` spec in
+`spec/requests/sessions_spec.rb` needs the SSR bundle built and its server
+running to pass — on a clean checkout (or in CI, see
+`.github/workflows/ci.yml`), run `bin/vite build --ssr --force` (`--force`
+avoids a stale `tmp/cache/vite` skipping the rebuild if `public/vite-ssr/`
+was removed without touching any source files) and `node
+public/vite-ssr/ssr.js &` before `bin/rspec`; without it, that one spec
+falls back to an empty `<div id="app">` and fails (every other spec is
+unaffected).
+
+</details>
