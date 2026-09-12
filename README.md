@@ -29,13 +29,21 @@ bin/dev # boots Rails + Vite
 
 Once running, visit `/register` to create an account, or `/session/new`
 (also the root path) to log in with a seeded account below. A logged-in
-admin lands on the dashboard (`/dashboard`, placeholder for now); a
-logged-in regular user lands on their profile (`/profile`), which can be
-edited at `/profile/edit` (full name and avatar) or deleted from there.
-Avatar upload is file-only (no remote-URL input, per the design spec) and
-validated server-side (`ActiveStorage`, content-type/size) — see
+admin lands on the dashboard (`/dashboard`), with real-time counts and a
+`/users` CRUD screen; a logged-in regular user lands on their profile
+(`/profile`), which can be edited at `/profile/edit` (full name and avatar)
+or deleted from there. Avatar upload is file-only (no remote-URL input, per
+the design spec) and validated server-side (`ActiveStorage`,
+content-type/size) — see
 `docs/superpowers/specs/2026-09-11-user-management-app-design.md` for
 details.
+
+From `/users`, an admin can also bulk-import users at `/imports/new` by
+uploading a `.csv` or `.xlsx` spreadsheet (parsed with the `roo` gem). Rows
+are created asynchronously via Solid Queue, with live progress (processed
+count, status, and any per-row errors) streamed back over Solid Cable to the
+import page; invalid rows are skipped and reported rather than aborting the
+whole import.
 
 Default seeded accounts (see `db/seeds.rb`):
 - Admin: `admin@umanni.test` / `password123`

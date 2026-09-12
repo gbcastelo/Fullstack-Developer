@@ -23,17 +23,23 @@ class ImportUsersJob < ApplicationJob
           role: :user
         )
 
-        if user.save
-          # row succeeded
-        else
-          errors << "Row #{i}: #{user.errors.full_messages.to_sentence}"
-        end
+        errors << "Row #{i}: #{user.errors.full_messages.to_sentence}" unless user.save
 
-        broadcast_progress(status: "processing", processed: i - 1, total: total, errors: errors)
+        # Skip the interim broadcast on the last row: it would carry the same
+        # processed count as the "done" broadcast right after it with no real
+        # work in between (every other pair of broadcasts is naturally spaced
+        # out by a row's save call), and firing both back-to-back races on
+        # ActionCable's async delivery -- the client can render whichever one
+        # its thread pool happens to deliver last, occasionally dropping the
+        # final "done" update.
+        broadcast_progress(status: "processing", processed: i - 1, total: total, errors: errors) unless i == spreadsheet.last_row
       end
 
       broadcast_progress(status: "done", processed: total, total: total, errors: errors)
     end
+  rescue => e
+    broadcast_progress(status: "failed", processed: 0, total: 0, errors: [ e.message ])
+    raise
   ensure
     blob&.purge
   end

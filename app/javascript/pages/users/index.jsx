@@ -16,7 +16,7 @@ export default function Index({ users }) {
         <h1 className="text-xl font-semibold">Users</h1>
         <nav className="flex items-center gap-4">
           <Link href="/dashboard" className="text-sm text-blue-600">Back to dashboard</Link>
-          <Link href="/imports/new" className="text-blue-600">Import users</Link>
+          <Link href="/imports/new" className="text-sm text-blue-600">Import users</Link>
           <Link href="/users/new" className="bg-blue-600 text-white rounded px-3 py-2">New user</Link>
         </nav>
       </div>

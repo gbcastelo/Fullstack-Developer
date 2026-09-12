@@ -29,7 +29,10 @@ export default function New() {
         </button>
       </form>
       {progress && (
-        <div className="text-sm text-gray-700" data-testid="import-progress">
+        <div
+          className={`text-sm ${progress.status === 'failed' ? 'text-red-600' : 'text-gray-700'}`}
+          data-testid="import-progress"
+        >
           <p>Status: {progress.status}</p>
           <p>Processed: {progress.processed} / {progress.total}</p>
           {progress.errors?.length > 0 && (
