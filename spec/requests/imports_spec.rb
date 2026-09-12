@@ -7,19 +7,41 @@ RSpec.describe "Imports", type: :request do
     post session_path, params: { email_address: user.email_address, password: "password123" }
   end
 
-  it "blocks non-admins" do
-    sign_in(create(:user, password: "password123"))
-    post imports_path, params: { file: fixture_file_upload("users_import.csv", "text/csv") }
-    expect(response).to redirect_to(profile_path)
+  describe "GET /imports/new" do
+    it "redirects non-admins to their profile" do
+      sign_in(create(:user, password: "password123"))
+      get new_import_path
+      expect(response).to redirect_to(profile_path)
+    end
+
+    it "renders for an admin" do
+      sign_in(admin)
+      get new_import_path
+      expect(response).to have_http_status(:ok)
+    end
   end
 
-  it "enqueues ImportUsersJob for an admin upload" do
-    sign_in(admin)
-
-    expect {
+  describe "POST /imports" do
+    it "blocks non-admins" do
+      sign_in(create(:user, password: "password123"))
       post imports_path, params: { file: fixture_file_upload("users_import.csv", "text/csv") }
-    }.to have_enqueued_job(ImportUsersJob)
+      expect(response).to redirect_to(profile_path)
+    end
 
-    expect(response).to redirect_to(users_path)
+    it "enqueues ImportUsersJob for an admin upload and returns to the import page" do
+      sign_in(admin)
+
+      expect {
+        post imports_path, params: { file: fixture_file_upload("users_import.csv", "text/csv") }
+      }.to have_enqueued_job(ImportUsersJob)
+
+      expect(response).to redirect_to(new_import_path)
+    end
+
+    it "rejects a missing file" do
+      sign_in(admin)
+      post imports_path, params: {}
+      expect(response).to redirect_to(new_import_path)
+    end
   end
 end
