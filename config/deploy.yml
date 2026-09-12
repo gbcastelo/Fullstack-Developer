@@ -1,0 +1,149 @@
+# Name of your application. Used to uniquely configure containers.
+service: umanni
+
+# Name of the container image (use your-user/app-name on external registries).
+#
+# NOTE: this is a placeholder — gbcastelo/umanni assumes this fork's GitHub
+# Container/Docker Hub account. Replace it with a real registry path you
+# control before ever running `kamal deploy` for real.
+image: gbcastelo/umanni
+
+# Deploy to these servers.
+servers:
+  web:
+    # Placeholder — replace with a real server IP/hostname before deploying.
+    - 192.168.0.1
+  # job:
+  #   hosts:
+  #     - 192.168.0.1
+  #   cmd: bin/jobs
+
+# Enable SSL auto certification via Let's Encrypt and allow for multiple apps on a single web server.
+# If used with Cloudflare, set encryption mode in SSL/TLS setting to "Full" to enable CF-to-app encryption.
+#
+# Using an SSL proxy like this requires turning on config.assume_ssl and config.force_ssl in production.rb!
+#
+# Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
+#
+# proxy:
+#   ssl: true
+#   host: umanni.example.com
+
+# Where you keep your container images.
+#
+# Placeholder — points at Docker Hub under the `image:` account above. Set
+# real credentials (or swap to GHCR/ECR/etc.) before deploying for real.
+registry:
+  # Alternatives: hub.docker.com / registry.digitalocean.com / ghcr.io / ...
+  username:
+    - gbcastelo
+
+  # Always use an access token rather than real password when possible.
+  # Add KAMAL_REGISTRY_PASSWORD to .kamal/secrets before deploying.
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+# Inject ENV variables into containers (secrets come from .kamal/secrets).
+#
+# RAILS_MASTER_KEY is already wired up the same way CI reads it
+# (.github/workflows/ci.yml passes RAILS_MASTER_KEY from a GitHub secret;
+# .kamal/secrets reads it from `config/master.key` for Kamal deploys — see
+# that file, no separate secrets mechanism is introduced here).
+#
+# FEATURE_USER_MANAGEMENT_APP_DATABASE_PASSWORD matches the password env var
+# config/database.yml's production section actually reads. Add it to
+# .kamal/secrets before deploying, e.g.:
+#   FEATURE_USER_MANAGEMENT_APP_DATABASE_PASSWORD=$(kamal secrets ...)
+env:
+  secret:
+    - RAILS_MASTER_KEY
+    - FEATURE_USER_MANAGEMENT_APP_DATABASE_PASSWORD
+  clear:
+    # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
+    # When you start using multiple servers, you should split out job processing to a dedicated machine.
+    SOLID_QUEUE_IN_PUMA: true
+
+    # Set number of processes dedicated to Solid Queue (default: 1)
+    # JOB_CONCURRENCY: 3
+
+    # Set number of cores available to the application on each server (default: 1).
+    # WEB_CONCURRENCY: 2
+
+    # This app has no Redis dependency (Solid Queue/Solid Cable run on
+    # Postgres, see the `db` accessory below), so there is nothing to
+    # configure here for Action Cable/queueing beyond SOLID_QUEUE_IN_PUMA.
+
+    # Points ActiveRecord at the `db` accessory defined below. Kamal reaches
+    # accessories by "<service>-<accessory-name>" on its internal Docker
+    # network, so this resolves to the Postgres accessory once it's booted
+    # (`kamal accessory boot db`).
+    DB_HOST: umanni-db
+
+    # Log everything from Rails
+    # RAILS_LOG_LEVEL: debug
+
+# Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
+# "bin/kamal logs -r job" will tail logs from the first server in the job section.
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+  dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
+
+# Use a persistent storage volume for local Active Storage files (avatar
+# uploads). Recommended to change this to a mounted volume path that is
+# backed up off server.
+volumes:
+  - "umanni_storage:/rails/storage"
+
+# Bridge fingerprinted assets, like JS and CSS, between versions to avoid
+# hitting 404 on in-flight requests. Combines all files from new and old
+# version inside the asset_path.
+asset_path: /rails/public/assets
+
+# Configure the image builder.
+builder:
+  arch: amd64
+
+  # # Build image via remote server (useful for faster amd64 builds on arm64 computers)
+  # remote: ssh://docker@docker-builder-server
+  #
+  # # Pass arguments and secrets to the Docker build process
+  # args:
+  #   RUBY_VERSION: ruby-3.4.10
+  # secrets:
+  #   - GITHUB_TOKEN
+  #   - RAILS_MASTER_KEY
+
+# Use a different ssh user than root
+# ssh:
+#   user: app
+
+# Use accessory services (secrets come from .kamal/secrets).
+#
+# This app uses PostgreSQL (not SQLite) and Solid Queue/Solid Cable on
+# Postgres (not Redis), so the accessory below is Postgres rather than the
+# generic mysql/redis examples Kamal's `rails new` template ships with.
+#
+# `db:prepare` (run automatically on boot by bin/docker-entrypoint) creates
+# and migrates all four databases this app needs against this one server:
+# the primary DB plus the solid_cache/solid_queue/solid_cable DBs (see
+# config/database.yml).
+accessories:
+  db:
+    image: postgres:16
+    # Placeholder — replace with a real, persistent Postgres host (a managed
+    # instance or a dedicated accessory server) before deploying.
+    host: 192.168.0.2
+    # Only exposed on localhost of that host; the app reaches it over the
+    # internal Kamal Docker network via DB_HOST above, not this port.
+    port: "127.0.0.1:5432:5432"
+    env:
+      clear:
+        POSTGRES_USER: feature_user_management_app
+      secret:
+        # Reuses the same value as FEATURE_USER_MANAGEMENT_APP_DATABASE_PASSWORD
+        # above, so the app and the Postgres accessory always agree on it.
+        - POSTGRES_PASSWORD:FEATURE_USER_MANAGEMENT_APP_DATABASE_PASSWORD
+    directories:
+      - data:/var/lib/postgresql/data

@@ -1,0 +1,14 @@
+pt-BR:
+  flash:
+    not_authorized: "Você não tem permissão para ver esta página."
+    login_failed: "Tente outro email ou senha."
+    login_rate_limited: "Tente novamente mais tarde."
+    user_created: "Usuário criado."
+    user_updated: "Usuário atualizado."
+    user_deleted: "Usuário excluído."
+    self_modify_blocked: "Você não pode excluir ou alterar seu próprio cargo por aqui."
+    import_started: "Importação iniciada."
+    choose_a_file: "Escolha um arquivo."
+  errors:
+    avatar_invalid_type: "deve ser uma imagem PNG, JPEG ou WEBP"
+    avatar_too_large: "deve ter menos de 5MB"

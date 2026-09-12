@@ -1,0 +1,14 @@
+en:
+  flash:
+    not_authorized: "You are not authorized to view this page."
+    login_failed: "Try another email address or password."
+    login_rate_limited: "Try again later."
+    user_created: "User created."
+    user_updated: "User updated."
+    user_deleted: "User deleted."
+    self_modify_blocked: "You cannot delete or change your own role here."
+    import_started: "Import started."
+    choose_a_file: "Choose a file."
+  errors:
+    avatar_invalid_type: "must be a PNG, JPEG, or WEBP image"
+    avatar_too_large: "must be smaller than 5MB"

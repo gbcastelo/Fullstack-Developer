@@ -1,0 +1,4 @@
+full_name,email_address,password
+Valid Row,valid@example.com,password123
+,missing-name@example.com,password123
+Bad Email,not-an-email,password123
