@@ -43,7 +43,8 @@ uploading a `.csv` or `.xlsx` spreadsheet (parsed with the `roo` gem). Rows
 are created asynchronously via Solid Queue, with live progress (processed
 count, status, and any per-row errors) streamed back over Solid Cable to the
 import page; invalid rows are skipped and reported rather than aborting the
-whole import.
+whole import. A ready-to-use sample file is included at
+[`sample_users_import.csv`](sample_users_import.csv) for trying this out.
 
 Default seeded accounts (see `db/seeds.rb`):
 - Admin: `admin@umanni.test` / `password123`
