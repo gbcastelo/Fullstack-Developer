@@ -69,7 +69,29 @@ bundle exec parallel_rspec spec/
 docker compose up
 ```
 
-(Docker/Kamal details are finalized in a later stage of this project.)
+The production image ([`Dockerfile`](Dockerfile)) is a standard Rails 8
+multi-stage build (gems/JS assets compiled in a `build` stage, copied into a
+slim runtime stage). It runs behind
+[Thruster](https://github.com/basecamp/thruster) (`gem "thruster"` in the
+Gemfile, `CMD ["./bin/thrust", "./bin/rails", "server"]`) as a zero-config
+HTTP proxy in front of Puma, handling asset caching/compression and
+X-Sendfile acceleration without extra web-server config. `docker build -t
+umanni .` has been verified to produce a working image end-to-end (gem
+install, JS asset build via Vite, asset precompile).
+
+### Kamal 2 deployment
+
+[`config/deploy.yml`](config/deploy.yml) is a ready-to-customize [Kamal
+2](https://kamal-deploy.org) config for this app specifically — service
+name, and a Postgres `accessory` + `DB_HOST`/database-password env vars
+matching this app's actual stack (Postgres, Solid Queue/Solid Cable, no
+Redis) instead of Kamal's generic SQLite/MySQL/Redis defaults.
+`RAILS_MASTER_KEY` is wired through `.kamal/secrets` the same way
+`.github/workflows/ci.yml` supplies it in CI. There is no live server to
+deploy this app to, so `image:`, `registry:`, and the server/accessory IPs
+are clearly-marked placeholders — a real registry and real hosts must be
+filled in before `bin/kamal deploy` would actually work. Validated with
+`bundle exec kamal config`.
 
 ## Local development notes (this sandbox)
 
