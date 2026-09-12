@@ -78,7 +78,9 @@ const dictionaries = {
     imports: {
       title: 'Upload a spreadsheet',
       description: 'CSV or XLSX. New users are always created with the standard role.',
-      dropzone: 'Click to choose a .csv or .xlsx file',
+      dropzone: 'Click to choose a .csv or .xlsx file, or drag it here',
+      chooseAnother: 'Choose a different file',
+      remove: 'Remove file',
       upload: 'Upload',
       status: 'Status',
       processed: 'Processed',
@@ -154,7 +156,9 @@ const dictionaries = {
     imports: {
       title: 'Enviar uma planilha',
       description: 'CSV ou XLSX. Novos usuários são sempre criados com o cargo padrão.',
-      dropzone: 'Clique para escolher um arquivo .csv ou .xlsx',
+      dropzone: 'Clique para escolher um arquivo .csv ou .xlsx, ou arraste aqui',
+      chooseAnother: 'Escolher outro arquivo',
+      remove: 'Remover arquivo',
       upload: 'Enviar',
       status: 'Status',
       processed: 'Processados',
