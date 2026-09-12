@@ -36,8 +36,9 @@
 # Ignore SimpleCov coverage output.
 /coverage/
 
-# AI process artifacts (specs/plans) — internal use only, not shipped in the final repo
+# AI process artifacts (specs/plans/task reports) — internal use only, not shipped in the final repo
 docs/superpowers/
+.superpowers/
 
 # local worktrees for isolated feature development
 .worktrees/

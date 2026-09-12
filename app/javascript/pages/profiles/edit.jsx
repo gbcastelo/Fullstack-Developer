@@ -1,4 +1,10 @@
 import { Head, useForm, router } from '@inertiajs/react'
+import { AppShell } from '../../components/app-shell'
+import { Card, CardContent } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { Label } from '../../components/ui/label'
+import { Avatar } from '../../components/ui/avatar'
 
 export default function Edit({ user, errors }) {
   const { data, setData, transform, patch, processing } = useForm({
@@ -24,40 +30,47 @@ export default function Edit({ user, errors }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <AppShell title="Edit profile">
       <Head title="Edit profile" />
-      <div className="max-w-md w-full mx-auto bg-white p-8 rounded shadow space-y-4">
-        <h1 className="text-xl font-semibold">Edit profile</h1>
-        <form onSubmit={submit} className="space-y-4">
-          <label className="block">
-            <span className="text-sm text-gray-700">Full name</span>
-            <input
-              required
-              value={data.full_name}
-              onChange={e => setData('full_name', e.target.value)}
-              placeholder={user.full_name}
-              className="mt-1 w-full border rounded px-3 py-2"
-            />
-          </label>
-          {errors?.full_name && <p className="text-red-600 text-sm">{errors.full_name}</p>}
-          <label className="block">
-            <span className="text-sm text-gray-700">Avatar</span>
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              onChange={e => setData('avatar', e.target.files[0])}
-              className="mt-1 w-full text-sm"
-            />
-          </label>
-          {errors?.avatar && <p className="text-red-600 text-sm">{errors.avatar}</p>}
-          <button disabled={processing} type="submit" className="w-full bg-blue-600 text-white rounded px-3 py-2">
-            Save
-          </button>
-        </form>
-        <button onClick={destroy} className="w-full border border-red-600 text-red-600 rounded px-3 py-2">
-          Delete my account
-        </button>
-      </div>
-    </div>
+      <Card className="max-w-lg">
+        <CardContent className="space-y-6 pt-6">
+          <div className="flex items-center gap-4">
+            <Avatar name={user.full_name} size="lg" />
+            <div className="space-y-1.5">
+              <Label htmlFor="avatar">Avatar</Label>
+              <input
+                id="avatar"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={e => setData('avatar', e.target.files[0])}
+                className="text-sm text-muted-foreground file:mr-2 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium"
+              />
+              {errors?.avatar && <p className="text-sm text-destructive">{errors.avatar}</p>}
+            </div>
+          </div>
+
+          <form onSubmit={submit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="full_name">Full name</Label>
+              <Input
+                id="full_name"
+                required
+                value={data.full_name}
+                onChange={e => setData('full_name', e.target.value)}
+                placeholder={user.full_name}
+              />
+              {errors?.full_name && <p className="text-sm text-destructive">{errors.full_name}</p>}
+            </div>
+            <Button disabled={processing} type="submit" className="w-full">
+              Save
+            </Button>
+          </form>
+
+          <Button onClick={destroy} variant="outline" className="w-full border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive">
+            Delete my account
+          </Button>
+        </CardContent>
+      </Card>
+    </AppShell>
   )
 }

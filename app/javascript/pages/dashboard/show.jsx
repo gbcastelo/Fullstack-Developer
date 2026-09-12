@@ -1,37 +1,47 @@
-import { Head, Link, router, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
+import { Users2, ShieldCheck, UserRound } from 'lucide-react'
 import useDashboardChannel from '../../hooks/useDashboardChannel'
+import { AppShell } from '../../components/app-shell'
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 
 export default function Show({ total_users, users_by_role }) {
   const { total_users: total, users_by_role: byRole } = useDashboardChannel({ total_users, users_by_role })
-  const { flash } = usePage().props
 
-  function signOut() {
-    router.delete('/session')
-  }
+  const roleCards = [
+    { role: 'admin', label: 'Admins', icon: ShieldCheck },
+    { role: 'user', label: 'Users', icon: UserRound },
+  ]
 
   return (
-    <div className="max-w-2xl mx-auto mt-12 space-y-6">
+    <AppShell title="Dashboard">
       <Head title="Dashboard" />
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl font-semibold">Admin Dashboard</h1>
-        <nav className="flex items-center gap-4 text-sm">
-          <Link href="/users" className="text-blue-600">Manage users</Link>
-          <Link href="/profile" className="text-blue-600">My profile</Link>
-          <button onClick={signOut} className="text-gray-600">Sign out</button>
-        </nav>
-      </div>
-      {flash?.alert && <p className="text-red-600 text-sm">{flash.alert}</p>}
-      {flash?.notice && <p className="text-green-600 text-sm">{flash.notice}</p>}
-      <div className="bg-white rounded shadow p-6">
-        <p className="text-sm text-gray-500">Total users</p>
-        <p className="text-3xl font-bold" data-testid="total-users">{total}</p>
-      </div>
-      <div className="bg-white rounded shadow p-6 space-y-2">
-        <p className="text-sm text-gray-500">By role</p>
-        {Object.entries(byRole).map(([role, count]) => (
-          <p key={role} data-testid={`role-count-${role}`}>{role}: {count}</p>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card>
+          <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total users</CardTitle>
+            <Users2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold tracking-tight" data-testid="total-users">{total}</p>
+            <p className="text-xs text-muted-foreground">Updates live</p>
+          </CardContent>
+        </Card>
+
+        {roleCards.map(({ role, label, icon: Icon }) => (
+          <Card key={role}>
+            <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
+              <Icon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold tracking-tight" data-testid={`role-count-${role}`}>
+                {role}: {byRole[role] ?? 0}
+              </p>
+            </CardContent>
+          </Card>
         ))}
       </div>
-    </div>
+    </AppShell>
   )
 }

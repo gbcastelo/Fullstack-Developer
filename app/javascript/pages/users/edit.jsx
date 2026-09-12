@@ -1,4 +1,9 @@
 import { Head, useForm } from '@inertiajs/react'
+import { AppShell } from '../../components/app-shell'
+import { Card, CardContent } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { Label } from '../../components/ui/label'
 
 export default function Edit({ user, errors }) {
   const { data, setData, patch, transform, processing } = useForm({
@@ -12,27 +17,36 @@ export default function Edit({ user, errors }) {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-12 bg-white p-8 rounded shadow space-y-4">
+    <AppShell title="Edit user">
       <Head title="Edit user" />
-      <h1 className="text-xl font-semibold">Edit user</h1>
-      <form onSubmit={submit} className="space-y-4">
-        <label className="block">
-          <span className="text-sm text-gray-700">Full name</span>
-          <input required value={data.full_name} onChange={e => setData('full_name', e.target.value)}
-            className="w-full border rounded px-3 py-2" />
-        </label>
-        <label className="block">
-          <span className="text-sm text-gray-700">Email</span>
-          <input required type="email" value={data.email_address} onChange={e => setData('email_address', e.target.value)}
-            className="w-full border rounded px-3 py-2" />
-        </label>
-        <select value={data.role} onChange={e => setData('role', e.target.value)} className="w-full border rounded px-3 py-2">
-          <option value="user">user</option>
-          <option value="admin">admin</option>
-        </select>
-        {errors?.email_address && <p className="text-red-600 text-sm">{errors.email_address}</p>}
-        <button disabled={processing} type="submit" className="w-full bg-blue-600 text-white rounded px-3 py-2">Save</button>
-      </form>
-    </div>
+      <Card className="max-w-lg">
+        <CardContent className="pt-6">
+          <form onSubmit={submit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="full_name">Full name</Label>
+              <Input id="full_name" required value={data.full_name} onChange={e => setData('full_name', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="email_address">Email</Label>
+              <Input id="email_address" required type="email" value={data.email_address} onChange={e => setData('email_address', e.target.value)} />
+              {errors?.email_address && <p className="text-sm text-destructive">{errors.email_address}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="role">Role</Label>
+              <select
+                id="role"
+                value={data.role}
+                onChange={e => setData('role', e.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="user">user</option>
+                <option value="admin">admin</option>
+              </select>
+            </div>
+            <Button disabled={processing} type="submit" className="w-full">Save</Button>
+          </form>
+        </CardContent>
+      </Card>
+    </AppShell>
   )
 }

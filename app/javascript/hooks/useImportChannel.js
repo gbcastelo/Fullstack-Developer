@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
-import consumer from "../channels/consumer"
+import getConsumer from "../channels/consumer"
 
 export default function useImportChannel() {
   const [progress, setProgress] = useState(null)
 
   useEffect(() => {
-    const subscription = consumer.subscriptions.create("ImportChannel", {
+    const subscription = getConsumer().subscriptions.create("ImportChannel", {
       received(payload) {
         setProgress(payload)
       }

@@ -1,5 +1,9 @@
-import { Head, Link, useForm } from '@inertiajs/react'
+import { Head, useForm } from '@inertiajs/react'
+import { UploadCloud, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import useImportChannel from '../../hooks/useImportChannel'
+import { AppShell } from '../../components/app-shell'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
 
 export default function New() {
   const { setData, post, processing } = useForm({ file: null })
@@ -11,37 +15,59 @@ export default function New() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-12 bg-white p-8 rounded shadow space-y-4">
+    <AppShell title="Import users">
       <Head title="Import users" />
-      <Link href="/users" className="text-blue-600 text-sm">&larr; Back to users</Link>
-      <h1 className="text-xl font-semibold">Import users</h1>
-      <form onSubmit={submit} className="space-y-4">
-        <input
-          type="file"
-          name="file"
-          accept=".csv,.xlsx"
-          required
-          onChange={e => setData('file', e.target.files[0])}
-          className="w-full"
-        />
-        <button disabled={processing} type="submit" className="w-full bg-blue-600 text-white rounded px-3 py-2">
-          Upload
-        </button>
-      </form>
-      {progress && (
-        <div
-          className={`text-sm ${progress.status === 'failed' ? 'text-red-600' : 'text-gray-700'}`}
-          data-testid="import-progress"
-        >
-          <p>Status: {progress.status}</p>
-          <p>Processed: {progress.processed} / {progress.total}</p>
-          {progress.errors?.length > 0 && (
-            <ul className="text-red-600">
-              {progress.errors.map((e, i) => <li key={i}>{e}</li>)}
-            </ul>
+      <Card className="max-w-lg">
+        <CardHeader>
+          <CardTitle>Upload a spreadsheet</CardTitle>
+          <CardDescription>CSV or XLSX. New users are always created with the standard role.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form onSubmit={submit} className="space-y-4">
+            <label
+              htmlFor="file"
+              className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:bg-accent/40"
+            >
+              <UploadCloud className="h-8 w-8" />
+              <span>Click to choose a .csv or .xlsx file</span>
+            </label>
+            <input
+              id="file"
+              type="file"
+              name="file"
+              accept=".csv,.xlsx"
+              required
+              onChange={e => setData('file', e.target.files[0])}
+              className="sr-only"
+            />
+            <Button disabled={processing} type="submit" className="w-full">
+              Upload
+            </Button>
+          </form>
+
+          {progress && (
+            <div
+              className="space-y-2 rounded-lg border border-border p-4 text-sm"
+              data-testid="import-progress"
+            >
+              <div className="flex items-center gap-2 font-medium">
+                {progress.status === 'done' && <CheckCircle2 className="h-4 w-4 text-success" />}
+                {progress.status === 'failed' && <XCircle className="h-4 w-4 text-destructive" />}
+                {progress.status === 'processing' && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                <span className={progress.status === 'failed' ? 'text-destructive' : ''}>
+                  Status: {progress.status}
+                </span>
+              </div>
+              <p className="text-muted-foreground">Processed: {progress.processed} / {progress.total}</p>
+              {progress.errors?.length > 0 && (
+                <ul className="list-inside list-disc text-destructive">
+                  {progress.errors.map((e, i) => <li key={i}>{e}</li>)}
+                </ul>
+              )}
+            </div>
           )}
-        </div>
-      )}
-    </div>
+        </CardContent>
+      </Card>
+    </AppShell>
   )
 }

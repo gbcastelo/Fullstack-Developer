@@ -11,6 +11,13 @@ class ApplicationController < ActionController::Base
   # silently after a redirect.
   inertia_share flash: -> { flash.to_hash }
 
+  # Share the signed-in user with every Inertia page (nil on unauthenticated
+  # pages like login/registration) so a shared nav/shell can render
+  # consistently without every controller having to pass it explicitly.
+  inertia_share do
+    { current_user: Current.user&.as_json(only: %i[id full_name email_address role]) }
+  end
+
   private
 
   def require_admin!

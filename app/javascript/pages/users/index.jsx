@@ -1,8 +1,12 @@
-import { Head, Link, router, usePage } from '@inertiajs/react'
+import { Head, Link, router } from '@inertiajs/react'
+import { Plus, Pencil, Repeat, Trash2 } from 'lucide-react'
+import { AppShell } from '../../components/app-shell'
+import { Button, buttonVariants } from '../../components/ui/button'
+import { Badge } from '../../components/ui/badge'
+import { Avatar } from '../../components/ui/avatar'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/table'
 
 export default function Index({ users }) {
-  const { flash } = usePage().props
-
   function destroy(user) {
     if (confirm(`Delete ${user.full_name}?`)) {
       router.delete(`/users/${user.id}`)
@@ -10,36 +14,69 @@ export default function Index({ users }) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto mt-12 space-y-4">
+    <AppShell title="Users">
       <Head title="Users" />
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl font-semibold">Users</h1>
-        <nav className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-sm text-blue-600">Back to dashboard</Link>
-          <Link href="/imports/new" className="text-sm text-blue-600">Import users</Link>
-          <Link href="/users/new" className="bg-blue-600 text-white rounded px-3 py-2">New user</Link>
-        </nav>
+
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">{users.length} user{users.length === 1 ? '' : 's'}</p>
+        <Link href="/users/new" className={buttonVariants('default', 'default')}>
+          <Plus className="h-4 w-4" />
+          New user
+        </Link>
       </div>
-      {flash?.alert && <p className="text-red-600 text-sm">{flash.alert}</p>}
-      {flash?.notice && <p className="text-green-600 text-sm">{flash.notice}</p>}
-      <table className="w-full bg-white rounded shadow">
-        <tbody>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {users.map(user => (
-            <tr key={user.id} className="border-b last:border-0">
-              <td className="p-3">{user.full_name}</td>
-              <td className="p-3 text-gray-500">{user.email_address}</td>
-              <td className="p-3">{user.role}</td>
-              <td className="p-3 space-x-2">
-                <Link href={`/users/${user.id}/edit`} className="text-blue-600">Edit</Link>
-                <button onClick={() => router.patch(`/users/${user.id}/toggle_role`)} className="text-amber-600">
-                  Toggle role
-                </button>
-                <button onClick={() => destroy(user)} className="text-red-600">Delete</button>
-              </td>
-            </tr>
+            <TableRow key={user.id}>
+              <TableCell>
+                <div className="flex items-center gap-3">
+                  <Avatar name={user.full_name} size="sm" />
+                  <span className="font-medium">{user.full_name}</span>
+                </div>
+              </TableCell>
+              <TableCell className="text-muted-foreground">{user.email_address}</TableCell>
+              <TableCell>
+                <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>{user.role}</Badge>
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex items-center justify-end gap-1">
+                  <Link href={`/users/${user.id}/edit`} className={buttonVariants('ghost', 'sm')}>
+                    <Pencil className="h-3.5 w-3.5" />
+                    Edit
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-amber-600 hover:text-amber-700"
+                    onClick={() => router.patch(`/users/${user.id}/toggle_role`)}
+                  >
+                    <Repeat className="h-3.5 w-3.5" />
+                    Toggle role
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => destroy(user)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Delete
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </Table>
+    </AppShell>
   )
 }
