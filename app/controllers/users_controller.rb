@@ -14,7 +14,7 @@ class UsersController < ApplicationController
   def create
     user = User.new(user_params)
     if user.save
-      redirect_to users_path, notice: "User created."
+      redirect_to users_path, notice: t("flash.user_created")
     else
       render inertia: "users/new", props: { errors: user.errors }, status: :unprocessable_content
     end
@@ -26,7 +26,7 @@ class UsersController < ApplicationController
 
   def update
     if @user.update(edit_params)
-      redirect_to users_path, notice: "User updated."
+      redirect_to users_path, notice: t("flash.user_updated")
     else
       render inertia: "users/edit", props: { user: user_json(@user), errors: @user.errors }, status: :unprocessable_content
     end
@@ -34,7 +34,7 @@ class UsersController < ApplicationController
 
   def destroy
     @user.destroy
-    redirect_to users_path, notice: "User deleted."
+    redirect_to users_path, notice: t("flash.user_deleted")
   end
 
   def toggle_role
@@ -51,7 +51,7 @@ class UsersController < ApplicationController
   def prevent_self_modification
     return unless @user == Current.user
 
-    redirect_to users_path, alert: "You cannot delete or change your own role here."
+    redirect_to users_path, alert: t("flash.self_modify_blocked")
   end
 
   def user_list

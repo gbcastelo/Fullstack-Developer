@@ -7,8 +7,10 @@ import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Avatar } from '../../components/ui/avatar'
+import { useTranslation } from '../../lib/i18n'
 
 export default function Edit({ user, errors }) {
+  const { t } = useTranslation()
   const { data, setData, transform, patch, processing } = useForm({
     full_name: user.full_name,
     avatar: null,
@@ -39,14 +41,14 @@ export default function Edit({ user, errors }) {
   }
 
   function destroy() {
-    if (confirm('Delete your account? This cannot be undone.')) {
+    if (confirm(t('profile.confirmDelete'))) {
       router.delete('/profile')
     }
   }
 
   return (
-    <AppShell title="Edit profile">
-      <Head title="Edit profile" />
+    <AppShell title={t('profile.editProfile')}>
+      <Head title={t('profile.editProfile')} />
       <Card className="max-w-lg">
         <CardContent className="pt-6">
           <form onSubmit={submit} className="space-y-6">
@@ -66,7 +68,7 @@ export default function Edit({ user, errors }) {
                 onClick={() => fileInputRef.current?.click()}
                 className="text-sm font-medium text-primary hover:underline"
               >
-                Change photo
+                {t('profile.changePhoto')}
               </button>
               <input
                 ref={fileInputRef}
@@ -80,7 +82,7 @@ export default function Edit({ user, errors }) {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="full_name">Full name</Label>
+              <Label htmlFor="full_name">{t('profile.fullName')}</Label>
               <Input
                 id="full_name"
                 required
@@ -91,7 +93,7 @@ export default function Edit({ user, errors }) {
               {errors?.full_name && <p className="text-sm text-destructive">{errors.full_name}</p>}
             </div>
             <Button disabled={processing} type="submit" className="w-full">
-              Save
+              {t('profile.save')}
             </Button>
           </form>
 
@@ -100,7 +102,7 @@ export default function Edit({ user, errors }) {
             variant="outline"
             className="mt-4 w-full border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
-            Delete my account
+            {t('profile.deleteAccount')}
           </Button>
         </CardContent>
       </Card>

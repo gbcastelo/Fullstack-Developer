@@ -5,9 +5,11 @@ import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Alert } from '../../components/ui/alert'
 import { Card, CardContent } from '../../components/ui/card'
+import { useTranslation } from '../../lib/i18n'
 
 export default function New() {
   const { flash } = usePage().props
+  const { t } = useTranslation()
   const { data, setData, post, processing } = useForm({
     email_address: '',
     password: '',
@@ -20,12 +22,12 @@ export default function New() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Head title="Sign in" />
+      <Head title={t('sessions.title')} />
       <div className="w-full max-w-sm space-y-6">
         <div className="flex flex-col items-center gap-2 text-center">
           <ShieldCheck className="h-9 w-9 text-primary" />
-          <h1 className="text-xl font-semibold tracking-tight">Sign in to Umanni Admin</h1>
-          <p className="text-sm text-muted-foreground">Manage users, roles, and imports</p>
+          <h1 className="text-xl font-semibold tracking-tight">{t('sessions.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('sessions.subtitle')}</p>
         </div>
 
         <Card>
@@ -34,36 +36,36 @@ export default function New() {
               {flash?.alert && <Alert variant="alert">{flash.alert}</Alert>}
               {flash?.notice && <Alert variant="notice">{flash.notice}</Alert>}
               <div className="space-y-1.5">
-                <Label htmlFor="email_address">Email</Label>
+                <Label htmlFor="email_address">{t('sessions.email')}</Label>
                 <Input
                   id="email_address"
                   type="email"
                   required
                   value={data.email_address}
                   onChange={e => setData('email_address', e.target.value)}
-                  placeholder="Email"
+                  placeholder={t('sessions.email')}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('sessions.password')}</Label>
                 <Input
                   id="password"
                   type="password"
                   required
                   value={data.password}
                   onChange={e => setData('password', e.target.value)}
-                  placeholder="Password"
+                  placeholder={t('sessions.password')}
                 />
               </div>
               <Button disabled={processing} type="submit" className="w-full">
-                Sign in
+                {t('sessions.submit')}
               </Button>
             </form>
           </CardContent>
         </Card>
 
         <Link href="/register" className="block text-center text-sm text-primary hover:underline">
-          Create an account
+          {t('sessions.createAccount')}
         </Link>
       </div>
     </div>

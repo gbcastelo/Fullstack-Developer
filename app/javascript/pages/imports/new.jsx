@@ -4,8 +4,10 @@ import useImportChannel from '../../hooks/useImportChannel'
 import { AppShell } from '../../components/app-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
+import { useTranslation } from '../../lib/i18n'
 
 export default function New() {
+  const { t } = useTranslation()
   const { setData, post, processing } = useForm({ file: null })
   const progress = useImportChannel()
 
@@ -15,12 +17,12 @@ export default function New() {
   }
 
   return (
-    <AppShell title="Import users">
-      <Head title="Import users" />
+    <AppShell title={t('nav.importUsers')}>
+      <Head title={t('nav.importUsers')} />
       <Card className="max-w-lg">
         <CardHeader>
-          <CardTitle>Upload a spreadsheet</CardTitle>
-          <CardDescription>CSV or XLSX. New users are always created with the standard role.</CardDescription>
+          <CardTitle>{t('imports.title')}</CardTitle>
+          <CardDescription>{t('imports.description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={submit} className="space-y-4">
@@ -29,7 +31,7 @@ export default function New() {
               className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:bg-accent/40"
             >
               <UploadCloud className="h-8 w-8" />
-              <span>Click to choose a .csv or .xlsx file</span>
+              <span>{t('imports.dropzone')}</span>
             </label>
             <input
               id="file"
@@ -41,7 +43,7 @@ export default function New() {
               className="sr-only"
             />
             <Button disabled={processing} type="submit" className="w-full">
-              Upload
+              {t('imports.upload')}
             </Button>
           </form>
 
@@ -55,10 +57,10 @@ export default function New() {
                 {progress.status === 'failed' && <XCircle className="h-4 w-4 text-destructive" />}
                 {progress.status === 'processing' && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
                 <span className={progress.status === 'failed' ? 'text-destructive' : ''}>
-                  Status: {progress.status}
+                  {t('imports.status')}: {progress.status}
                 </span>
               </div>
-              <p className="text-muted-foreground">Processed: {progress.processed} / {progress.total}</p>
+              <p className="text-muted-foreground">{t('imports.processed')}: {progress.processed} / {progress.total}</p>
               {progress.errors?.length > 0 && (
                 <ul className="list-inside list-disc text-destructive">
                   {progress.errors.map((e, i) => <li key={i}>{e}</li>)}

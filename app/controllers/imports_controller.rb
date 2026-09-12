@@ -6,7 +6,7 @@ class ImportsController < ApplicationController
   end
 
   def create
-    return redirect_to new_import_path, alert: "Choose a file." unless params[:file].respond_to?(:to_io)
+    return redirect_to new_import_path, alert: t("flash.choose_a_file") unless params[:file].respond_to?(:to_io)
 
     blob = ActiveStorage::Blob.create_and_upload!(
       io: params[:file].to_io,
@@ -14,6 +14,6 @@ class ImportsController < ApplicationController
       content_type: params[:file].content_type
     )
     ImportUsersJob.perform_later(blob.signed_id)
-    redirect_to new_import_path, notice: "Import started."
+    redirect_to new_import_path, notice: t("flash.import_started")
   end
 end

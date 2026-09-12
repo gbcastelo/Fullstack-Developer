@@ -1,25 +1,33 @@
 import { Link, usePage, router } from '@inertiajs/react'
-import { LayoutDashboard, Users, Upload, UserRound, LogOut, Sun, Moon, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, Users, Upload, UserRound, LogOut, Sun, Moon, ShieldCheck, Languages } from 'lucide-react'
 import { useTheme } from '../lib/use-theme'
+import { useTranslation } from '../lib/i18n'
 import { Avatar } from './ui/avatar'
 import { Alert } from './ui/alert'
 import { cn } from '../lib/utils'
-
-const NAV = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: true },
-  { href: '/users', label: 'Users', icon: Users, adminOnly: true },
-  { href: '/imports/new', label: 'Import users', icon: Upload, adminOnly: true },
-  { href: '/profile', label: 'My profile', icon: UserRound, adminOnly: false },
-]
 
 export function AppShell({ children, title }) {
   const { props, url } = usePage()
   const user = props.current_user
   const flash = props.flash || {}
   const [theme, setTheme] = useTheme()
+  const { t, locale } = useTranslation()
+
+  const NAV = [
+    { href: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard, adminOnly: true },
+    { href: '/users', label: t('nav.users'), icon: Users, adminOnly: true },
+    { href: '/imports/new', label: t('nav.importUsers'), icon: Upload, adminOnly: true },
+    { href: '/profile', label: t('nav.myProfile'), icon: UserRound, adminOnly: false },
+  ]
 
   function signOut() {
     router.delete('/session')
+  }
+
+  function toggleLocale() {
+    const next = locale === 'pt-BR' ? 'en' : 'pt-BR'
+    document.cookie = `locale=${next}; path=/; max-age=${60 * 60 * 24 * 365}`
+    router.reload()
   }
 
   return (
@@ -63,7 +71,7 @@ export function AppShell({ children, title }) {
                 className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               >
                 <LogOut className="h-4 w-4" />
-                <span className="sr-only">Sign out</span>
+                <span className="sr-only">{t('nav.signOut')}</span>
               </button>
             </div>
           </div>
@@ -73,13 +81,24 @@ export function AppShell({ children, title }) {
       <div className="flex min-h-screen flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:px-8">
           <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            aria-label="Toggle theme"
-            className="rounded-md border border-border p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          >
-            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleLocale}
+              aria-label="Toggle language"
+              title={locale === 'pt-BR' ? 'English' : 'Português'}
+              className="flex items-center gap-1.5 rounded-md border border-border px-2 py-2 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            >
+              <Languages className="h-4 w-4" />
+              {locale === 'pt-BR' ? 'PT' : 'EN'}
+            </button>
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              aria-label="Toggle theme"
+              className="rounded-md border border-border p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+          </div>
         </header>
 
         <main className="flex-1 space-y-4 p-4 md:p-8">

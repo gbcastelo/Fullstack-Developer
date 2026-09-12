@@ -21,11 +21,11 @@ class User < ApplicationRecord
     return unless avatar.attached?
 
     unless avatar.content_type.in?(%w[image/png image/jpeg image/webp])
-      errors.add(:avatar, "must be a PNG, JPEG, or WEBP image")
+      errors.add(:avatar, I18n.t("errors.avatar_invalid_type"))
     end
 
     if avatar.byte_size > 5.megabytes
-      errors.add(:avatar, "must be smaller than 5MB")
+      errors.add(:avatar, I18n.t("errors.avatar_too_large"))
     end
   end
 
