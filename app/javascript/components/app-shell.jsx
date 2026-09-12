@@ -53,7 +53,7 @@ export function AppShell({ children, title }) {
         {user && (
           <div className="border-t border-border p-3">
             <div className="flex items-center gap-3 rounded-md px-2 py-2">
-              <Avatar name={user.full_name} size="sm" />
+              <Avatar name={user.full_name} src={user.avatar_url} size="sm" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{user.full_name}</p>
                 <p className="truncate text-xs text-muted-foreground">{user.email_address}</p>

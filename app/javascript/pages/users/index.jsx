@@ -39,7 +39,7 @@ export default function Index({ users }) {
             <TableRow key={user.id}>
               <TableCell>
                 <div className="flex items-center gap-3">
-                  <Avatar name={user.full_name} size="sm" />
+                  <Avatar name={user.full_name} src={user.avatar_url} size="sm" />
                   <span className="font-medium">{user.full_name}</span>
                 </div>
               </TableCell>

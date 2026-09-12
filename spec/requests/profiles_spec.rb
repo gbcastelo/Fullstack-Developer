@@ -18,6 +18,21 @@ RSpec.describe "Profiles", type: :request do
       get profile_path
       expect(response).to have_http_status(:ok)
     end
+
+    it "includes a usable avatar_url once an avatar is attached" do
+      sign_in(user)
+      user.avatar.attach(
+        io: File.open(Rails.root.join("spec/fixtures/files/avatar.png")),
+        filename: "avatar.png",
+        content_type: "image/png"
+      )
+
+      get profile_path
+
+      page_json = response.body[/data-page="app" type="application\/json">(.*?)<\/script>/m, 1]
+      props = JSON.parse(page_json)["props"]
+      expect(props["user"]["avatar_url"]).to include("/rails/active_storage/blobs/")
+    end
   end
 
   describe "PATCH /profile" do

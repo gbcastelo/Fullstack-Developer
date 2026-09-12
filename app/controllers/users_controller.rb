@@ -59,7 +59,7 @@ class UsersController < ApplicationController
   end
 
   def user_json(user)
-    user.as_json(only: %i[id full_name email_address role])
+    user.as_json(only: %i[id full_name email_address role]).merge(avatar_url: avatar_url(user))
   end
 
   def user_params

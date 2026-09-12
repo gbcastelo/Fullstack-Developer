@@ -15,12 +15,22 @@ class ApplicationController < ActionController::Base
   # pages like login/registration) so a shared nav/shell can render
   # consistently without every controller having to pass it explicitly.
   inertia_share do
-    { current_user: Current.user&.as_json(only: %i[id full_name email_address role]) }
+    {
+      current_user: Current.user&.as_json(only: %i[id full_name email_address role])
+        &.merge(avatar_url: avatar_url(Current.user))
+    }
   end
 
   private
 
   def require_admin!
     redirect_to profile_path, alert: "You are not authorized to view this page." unless Current.user.admin?
+  end
+
+  # ActiveStorage attachments aren't plain attributes, so as_json's `only:`
+  # can't include them -- every place that serializes a user for an Inertia
+  # page needs this to actually show the avatar it lets people upload.
+  def avatar_url(user)
+    rails_blob_path(user.avatar, only_path: true) if user&.avatar&.attached?
   end
 end

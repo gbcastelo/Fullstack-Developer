@@ -12,7 +12,7 @@ export default function Show({ user }) {
       <Head title="My profile" />
       <Card className="max-w-lg">
         <CardHeader className="flex-row items-center gap-4 space-y-0">
-          <Avatar name={user.full_name} size="lg" />
+          <Avatar name={user.full_name} src={user.avatar_url} size="lg" />
           <div>
             <CardTitle>{user.full_name}</CardTitle>
             <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="mt-1">

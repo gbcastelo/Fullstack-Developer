@@ -35,7 +35,7 @@ export default function Edit({ user, errors }) {
       <Card className="max-w-lg">
         <CardContent className="space-y-6 pt-6">
           <div className="flex items-center gap-4">
-            <Avatar name={user.full_name} size="lg" />
+            <Avatar name={user.full_name} src={user.avatar_url} size="lg" />
             <div className="space-y-1.5">
               <Label htmlFor="avatar">Avatar</Label>
               <input

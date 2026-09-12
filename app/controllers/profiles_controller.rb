@@ -28,6 +28,6 @@ class ProfilesController < ApplicationController
   end
 
   def current_user_props
-    Current.user.as_json(only: %i[id full_name email_address role])
+    Current.user.as_json(only: %i[id full_name email_address role]).merge(avatar_url: avatar_url(Current.user))
   end
 end
